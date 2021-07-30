@@ -43,9 +43,6 @@ int main(int argc, char **argv) {
   if (metodo == ITEMKNN_ORIG) {
     // evaluacion_tiempos_ikOriginal(vec, nVecinos, nRecomendaciones);
     // freeEval(vec);
-    // #ifdef ALLOW_PRINTS
-    // printf("Resultados correctos.\n");
-    // #endif
   } else if (metodo == ITEMKNN_OPT) {
     // evaluacion_tiempos_ik(vec, nVecinos, nRecomendaciones);
     // freeEval(vec);
