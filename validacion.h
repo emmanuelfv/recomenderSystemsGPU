@@ -39,15 +39,7 @@
 #include "pop/POP.h"
 #endif
 
-#ifndef _TIME_H
-#include <time.h>
-#endif
-
-#include <gsl/gsl_statistics.h>
-
-
-
-//variales para identificar el método
+//variales para identificar a cada algoritmo
 #define ITEMKNN_ORIG    11
 #define ITEMKNN_OPT     12
 #define ITEMKNN_GPU     13
@@ -60,24 +52,8 @@
 
 #define POP             4
 
-void limpiezaTrain(EvalR *train, int tamTrain, int **listaUsuarios,
-                   int **listaItems, int *tUs, int *tIt);
+int tiempos_iknn(int metodo, Eval *vec, int k, int n);
 
-float *generaMatrizDatos(EvalR *train, int trainTam, int numUs, int numIt);
+void tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVecinos, int nRecomendaciones, int similitud);
 
-void evaluacionTopN(MatrixINT restaultados, EvalR *test, int testTam,
-                    int *listaUsuarios, int *listaItems, int max,
-                    float *PRECISION, float *RECALL, float *NDCG);
-
-void crossValidationT(int metodo, Eval *vecLectura, int kGrupos, int nVecinos, 
-                      int nRecomendaciones);
-
-int evaluacion_tiempos_ikOriginal(Eval *vec, int k, int n);
-
-int evaluacion_tiempos_ik(Eval *vec, int k, int n);
-
-int evaluacion_tiempos_ik_sp(Eval *vec, int k, int n);
-
-void findB(Eval *vec);
-
-void evaluacion_tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVecinos, int nRecomendaciones, int similitud);
+void tiempos_exactitud_parcial(int metodo, int dataset, int kGrupos, int nVecinos, int nRecomendaciones, int parte, int similitud);
