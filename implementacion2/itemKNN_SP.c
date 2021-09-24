@@ -454,7 +454,7 @@ float similitudEuc(Elemento *vecIt, int *indIt, float *medUs, int nI, int itemI,
     else if(vecIt[indIt[itemI]+i].ind > vecIt[indIt[itemJ]+j].ind) j++;
     else i++;
   }
-  float res = 1 - sqrt(sum1);
+  float res = 1/(1 - sqrt(sum1));
   if(cont < h) return res*((float) cont/h);
   return res;
 }
@@ -548,7 +548,7 @@ void construccion_SP(Elemento *vecUs, Elemento *vecIt, int *indUs, int *indIt, i
 
 
 void aplicacion_SP(Elemento *mat, int *indSim, Elemento *vecUs, int *indUs, Elemento *vecIt,
-  int *indIt, int nU, int nI, float *medIt, int nVecinos, int nRecomendaciones, Elemento **recomendaciones){
+  int *indIt, int nU, int nI, B_UI b, int nVecinos, int nRecomendaciones, Elemento **recomendaciones){
   //En la aplicación del modelo se tiene el resultado para cada usuario de las
   
   int u, i, r, j, it, iit, k, pmin, l, flag;
@@ -716,12 +716,12 @@ void aplicacion_SP(Elemento *mat, int *indSim, Elemento *vecUs, int *indUs, Elem
           // if(u>900 && i==1595) printf("%d %d %f %f %f\n", j, topVecinos[j].ind, medIt[j], vecUs->REC[indV].rat, topVecinos[j].val);
           // if(u>900 && i==1595) printf("%f %f %f\n", x1, x2, vecUs->REC[indV].rat - medIt[j]);
           
-          x1 += topVecinos[j].val * (vecUs[indV].val - medIt[j]);
+          x1 += topVecinos[j].val * (vecUs[indV].val - b.media - b.bu[u] - b.bi[topVecinos[j].ind]);
           // x2 += topVecinos[j].val;
           //  x1 += topVecinos[j].val * vecUs[indV].val;
         }
         // rui = medIt[i] + x1/x2;
-        rui = medIt[i] + x1;
+        rui = x1 + b.media + b.bu[u] + b.bi[i];
 
 
         // if(u==3) printf("%d %f\n", i, rui);
@@ -791,17 +791,36 @@ amazon_0.1%
 
 
 void get_b(Elemento *vecUs, Elemento *vecIt, int *indUs, int *indIt, int nU, int nI, B_UI *b){
+  
   b->bu = (float *) malloc(sizeof(float)*nU);
   b->bi = (float *) malloc(sizeof(float)*nI);
 
-    b->media = 2.2;
-    for(int j=0; j< 10; j++){
-      b->bu[j] = j;
+  int lamda2 = 10;
+  int lamda3 = 5;
+  
+
+  b->media = 0;
+  for(int i=0; i<indUs[nU]; i++) b->media += vecUs[i].val/indUs[nU];
+
+  for(int i=0; i<nI; i++)
+  {
+    b->bi[i] = 0;
+    for(int j=0; j<indIt[i+1] - indIt[i]; j++)
+    {
+      b->bi[i] += vecIt[indIt[i] + j].val - b->media;
     }
-    printf("\n");
-    for(int j=0; j< 10; j++){
-      b->bi[j] = j;
+    b->bi[i] /= lamda2 + (indIt[i+1] - indIt[i]);
+  }
+
+  for(int i=0; i<nU; i++)
+  {
+    b->bu[i] = 0;
+    for(int j=0; j<indUs[i+1] - indUs[i]; j++)
+    {
+      b->bu[i] += vecUs[indUs[i] + j].val - b->media - b->bi[vecUs[indUs[i] + j].ind];
     }
+    b->bu[i] /= lamda3 + (indUs[i+1] - indUs[i]);    
+  }
 
   return;
 }

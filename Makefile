@@ -54,6 +54,20 @@ valPrints: $(valid).cu $(r1)$(ikg).cu $(bib)$(lec).c $(bib)$(psql).c $(bib)$(nor
 	rm $(r1)$(ik).cu
 	rm $(r2)$(sik).cu
 
+valMemCheck: $(valid).cu $(r1)$(ikg).cu $(bib)$(lec).c $(bib)$(psql).c $(bib)$(nor).c
+	cp $(bib)$(lec).c $(bib)$(lec).cu
+	cp $(bib)$(nor).c $(bib)$(nor).cu
+	cp $(r1)$(ik).c $(r1)$(ik).cu
+	cp $(r2)$(sik).c $(r2)$(sik).cu
+	cp $(r4)POP.c $(r4)POP.cu
+	nvcc --gpu-architecture=sm_75 --device-c $(valid).cu $(r1)$(ikg).cu $(bib)$(lec).cu $(bib)$(nor).cu $(r1)$(ik).cu $(r2)$(sik).cu $(r2)$(sikg).cu $(r4)POP.cu
+	nvcc --gpu-architecture=sm_75 -o Validacion.o -lineinfo $(valid).o $(ikg).o $(lec).o $(nor).o $(ik).o $(sik).o $(sikg).o POP.o -lpq -lgsl -lgslcblas
+	rm $(bib)*.cu
+	rm $(r1)$(ik).cu
+	rm $(r2)$(sik).cu
+	rm $(r4)POP.cu
+
+
 # cp $(bib)$(psql).c $(bib)$(psql).cu
 # $(bib)$(psql).cu 
 # $(psql).o

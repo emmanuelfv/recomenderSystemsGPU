@@ -17,5 +17,11 @@ void construccion_SP_GPU(Elemento *vecUs, Elemento *vecIt, int *indUs, int *indI
                 float *medUs, float *medIt, Elemento **mat, int **indSim, int similitud);
 
 void aplicacion_SP_GPU(Elemento *mat, int *indSim, Elemento *vecUs, int *indUs, Elemento *vecIt,
-  int *indIt, int nU, int nI, float *medIt, int nVecinos, int nRecomendaciones, Elemento **recomendaciones);
+  int *indIt, int nU, int nI, B_UI b, int nVecinos, int nRecomendaciones, Elemento **recomendaciones);
 
+void construccion_SP_GPU2(Elemento *vecUs, Elemento *vecIt, int *indUs, int *indIt, int nU, int nI, 
+  float *medUs, float *medIt, int nVecinos, Elemento **matVecinos, int similitud);
+
+
+void aplicacion_SP_GPU2(Elemento *matVecinos, Elemento *vecUs, int *indUs, int nU, int nI, 
+  B_UI b, int nVecinos, int nRecomendaciones, Elemento **recomendaciones); 

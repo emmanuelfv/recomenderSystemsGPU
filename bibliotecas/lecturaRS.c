@@ -1,6 +1,5 @@
 
 
-
 //#include <cstdlib>
 #include "lecturaRS.h"
 
@@ -9,7 +8,6 @@
 #define UIR 3
 #define UIRT 4
 #define UIT 5
-
 
 typedef struct uir {
   int us, it;
@@ -617,3 +615,8 @@ void evaluacion(Elemento *recomendaciones, int nU, int nRecomendaciones, Element
 
   return;
 }
+
+
+// PQflush
+// PQfreemem
+// PQconninfoFree

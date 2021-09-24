@@ -81,6 +81,11 @@ typedef struct {
   Elemento *d;
 } MatrixElemento;
 
+typedef struct {
+    float media, *bu, *bi;
+}B_UI;
+
+
 //Constructores Matriz
 // Matrix *constructorMatrix_F(int a, int b, int alloc);
 
@@ -136,3 +141,4 @@ void validaMemoria(void *x, char *s);
 //Evaluación
 void evaluacion(Elemento *recomendaciones, int nU, int nRecomendaciones, Elemento *test, 
             int* indTest, float *PRECISION, float *RECALL, float *NDCG);
+

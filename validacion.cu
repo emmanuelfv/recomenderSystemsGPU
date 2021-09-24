@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   //   // evaluacion_tiempos_ik_sp(vec, kGrupos, nVecinos);
   //   freeEval(vec);
 
-  } else if (metodo == ITEMKNN_GPU || metodo == ITEMKNN_SP_GPU || metodo == POP) {
+  } else if (metodo == ITEMKNN_GPU || metodo == ITEMKNN_SP || metodo == ITEMKNN_SP_GPU || metodo == ITEMKNN_SP_GPU2 || metodo == POP) {
     evaluacion_tiempos_exactitud(metodo, dataset, kGrupos, nVecinos, nRecomendaciones, similitud);
     
   } else if (metodo == 100){
@@ -125,10 +125,11 @@ void evaluacion_tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVec
   Elemento *vUs, *vIt, *test;
   int *indTUs, *indTIt, *indTest, tUs, tIt;
 
-  Elemento *Mat;
+  Elemento *Mat, *matVecinos;
   int *indSim;
 
-  // B_UI b;
+
+  B_UI b;
 
   Elemento *recomendaciones;
 
@@ -214,43 +215,35 @@ void evaluacion_tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVec
       float *medUs, *medIt;
       getMediaPsql(indTUs, tUs, &medUs, USER);
       getMediaPsql(indTIt, tIt, &medIt, ITEM);
-      
-//       for(int q=0; q<tIt; q++)
-//       printf("%d %f\n", q, medIt[q]);
 
-// return;
+      get_b(vUs, vIt, indTUs, indTIt, tUs, tIt, &b);
+
       //Construcción del modelo
       t_ini = clock();
       construccion_SP_GPU(vUs, vIt, indTUs, indTIt, tUs, tIt, medUs, medIt, &Mat, &indSim, similitud);
       t_fin = clock();
       secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
       resultados[i][0] = secs;
-
-      // for(int k=0; k<tIt; k++){
-      //   printf("%d %d\n", k, indSim[k]);
-      // }
-      // printf("\n\n");
-      // for(int k=0; k<3; k++){
-      //   for(int l=indSim[100+k]; l< indSim[100+k+1]; l++){
-      //     printf("%d %f\n", Mat[l].ind, Mat[l].val);
-      //   }
-      // }
+      
       
       //Aplicacion del modelo
       t_ini = clock();
-      aplicacion_SP_GPU(Mat, indSim, vUs, indTUs, vIt, indTIt, tUs, tIt, medIt, nVecinos, nRecomendaciones, &recomendaciones);
+      aplicacion_SP_GPU(Mat, indSim, vUs, indTUs, vIt, indTIt, tUs, tIt, b, nVecinos, nRecomendaciones, &recomendaciones);
       t_fin = clock();
       secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
       resultados[i][1] = secs;
 
+      // printf("Elementos en M: %d de %d posibles\n", indSim[tIt], tIt*tIt);
+      
       //evaluación
       evaluacion(recomendaciones, tUs, nRecomendaciones, test, indTest, &resultados[i][2], &resultados[i][3], &resultados[i][4]);
-
-      // free(b.bu);
-      // free(b.bi);
+      
+      //liveración de memoria
+      free(b.bu);
+      free(b.bi);
       
       free(recomendaciones);
-      
+
       free(Mat);
       free(indSim);
       
@@ -263,8 +256,103 @@ void evaluacion_tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVec
       free(indTIt);
       free(vUs);
       free(indTUs);
-      // return;
-      // continue;
+    }else if (metodo == ITEMKNN_SP_GPU2){
+      getCrossSets_SP(dataset, kGrupos, i, &vUs, &indTUs, &tUs, &vIt, &indTIt, &tIt, &test, &indTest);
+      
+      float *medUs, *medIt;
+      getMediaPsql(indTUs, tUs, &medUs, USER);
+      getMediaPsql(indTIt, tIt, &medIt, ITEM);
+
+      get_b(vUs, vIt, indTUs, indTIt, tUs, tIt, &b);
+
+
+      // printf(" %d %d %f\n", tUs, tIt, b.media);
+      //Construcción del modelo
+      t_ini = clock();
+      construccion_SP_GPU2(vUs, vIt, indTUs, indTIt, tUs, tIt, medUs, medIt, nVecinos, &matVecinos, similitud);
+      t_fin = clock();
+      secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+      resultados[i][0] = secs;
+      
+      //Aplicacion del modelo
+      t_ini = clock();
+
+      aplicacion_SP_GPU2(matVecinos, vUs, indTUs, tUs, tIt, b, nVecinos, nRecomendaciones, &recomendaciones);
+      
+      t_fin = clock();
+      secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+      resultados[i][1] = secs;
+      
+      // evaluación
+      evaluacion(recomendaciones, tUs, nRecomendaciones, test, indTest, &resultados[i][2], &resultados[i][3], &resultados[i][4]);
+      
+      //liveración de memoria
+      free(b.bu);
+      free(b.bi);
+      
+      free(recomendaciones);
+
+      free(matVecinos);
+      
+      free(medUs);
+      free(medIt);
+
+      free(test);
+      free(indTest);
+      free(vIt);
+      free(indTIt);
+      free(vUs);
+      free(indTUs);
+
+    }else if (metodo == ITEMKNN_SP){
+      getCrossSets_SP(dataset, kGrupos, i, &vUs, &indTUs, &tUs, &vIt, &indTIt, &tIt, &test, &indTest);
+      
+      float *medUs, *medIt;
+      getMediaPsql(indTUs, tUs, &medUs, USER);
+      getMediaPsql(indTIt, tIt, &medIt, ITEM);
+      
+      get_b(vUs, vIt, indTUs, indTIt, tUs, tIt, &b);
+      
+      
+      //Construcción del modelo
+      t_ini = clock();
+      construccion_SP(vUs, vIt, indTUs, indTIt, tUs, tIt, medUs, medIt, &Mat, &indSim, similitud);
+      t_fin = clock();
+      secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+      resultados[i][0] = secs;
+      
+      //Aplicacion del modelo
+      t_ini = clock();
+      aplicacion_SP(Mat, indSim, vUs, indTUs, vIt, indTIt, tUs, tIt, b, nVecinos, nRecomendaciones, &recomendaciones);
+      t_fin = clock();
+      double secs2 = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+      resultados[i][1] = secs2;
+      printf("%f, %d\n", secs + secs2, i);
+      
+      //evaluación
+      evaluacion(recomendaciones, tUs, nRecomendaciones, test, indTest, &resultados[i][2], &resultados[i][3], &resultados[i][4]);
+      
+      //liveración de memoria
+      free(b.bu);
+      free(b.bi);
+      
+      free(recomendaciones);
+
+      free(Mat);
+      free(indSim);
+      
+      free(medUs);
+      free(medIt);
+
+      free(test);
+      free(indTest);
+      free(vIt);
+      free(indTIt);
+      free(vUs);
+      free(indTUs);
+
+
+
     }else if(metodo == POP){
       int *pops;
       int nU;
@@ -285,7 +373,7 @@ void evaluacion_tiempos_exactitud(int metodo, int dataset, int kGrupos, int nVec
 
   }
 
-  printf("%s ", getNombreTabla(dataset));
+  // printf("%s ", getNombreTabla(dataset));
 
   float *s = (float *) malloc(sizeof(float)*5);
   for(int r=0; r<5; r++){

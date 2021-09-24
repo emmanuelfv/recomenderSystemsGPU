@@ -11,13 +11,13 @@
 
 
 
-// #ifndef _LECTURA_RS_H
-// #include "bibliotecas/lecturaRS.h"
-// #endif
+#ifndef _LECTURA_RS_H
+#include "bibliotecas/lecturaRS.h"
+#endif
 
-// #ifndef _NORMALIZACION_H
-// #include "bibliotecas/normalizacion.h"
-// #endif
+#ifndef _NORMALIZACION_H
+#include "bibliotecas/normalizacion.h"
+#endif
 
 #ifndef _ITEMKNN_H
 #include "implementacion1/itemKNN.h"
@@ -54,6 +54,7 @@
 
 #define ITEMKNN_SP      21
 #define ITEMKNN_SP_GPU  22
+#define ITEMKNN_SP_GPU2 23
 
 #define DYNAMIC_INDEX   3
 
